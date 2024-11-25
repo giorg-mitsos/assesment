@@ -37,3 +37,10 @@ If everything worked accordingly the app should be up and seeded with fake data 
 http://localhost:8000/
 ~~~
 
+### Credentials (all users have the same password)
+
+~~~
+Manager : admin@epignosis.com
+
+Password : password
+~~~
