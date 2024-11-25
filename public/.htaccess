@@ -1,0 +1,10 @@
+# Allow .htaccess files to be used by Apache
+Options +FollowSymLinks
+RewriteEngine On
+
+# Handle "index.php" as the default file
+DirectoryIndex index.php
+# Redirect to index.php if no file is matched (useful for clean URLs)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L]
