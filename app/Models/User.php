@@ -107,7 +107,7 @@ class User
     public function delete(int $employee_code): bool
     {
         if ($employee_code === 1000000) {
-            $_SESSION['error'] = 'Cannot delete root account';
+            $_SESSION['error'] = 'You can\'t delete root account';
             return false;
         }
         $query = "DELETE FROM " . self::$table . " WHERE employee_code = :employee_code";

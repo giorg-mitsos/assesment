@@ -5,14 +5,17 @@ namespace App\Controllers;
 use App\Models\User;
 
 
-class LoginController {
+class LoginController
+{
     private $db;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
     }
 
-    public function login() {
+    public function login()
+    {
 
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             include __DIR__ . '/../Views/Login.php';
@@ -31,6 +34,7 @@ class LoginController {
                 $_SESSION['user_name'] = $user['name'];
                 $_SESSION['user_role'] = $user['role'];
                 $_SESSION['user_email'] = $user['email'];
+                $_SESSION['employee_code'] = $user['employee_code'];
 
                 unset($_SESSION['error']);
 
@@ -47,7 +51,8 @@ class LoginController {
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         session_destroy();
         header('Location: /login');
         exit;

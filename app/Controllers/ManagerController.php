@@ -76,6 +76,12 @@ class ManagerController
             $employee_code = $_POST['employee_code'];
             $user = $User->whereEmployeeCode($employee_code);
 
+            if ($user['employee_code'] === $_SESSION['employee_code']) {
+                $_SESSION['error'] = 'You can\'t delete your own account';
+                header('Location: /manager/dashboard');
+                exit();
+            }
+
             if ($user) {
                 $Vacation->deleteUserVacationRequests($user['id']);
                 $User->delete($user['employee_code']);
