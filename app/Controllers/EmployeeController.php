@@ -5,27 +5,30 @@ namespace App\Controllers;
 use App\Models\User;
 use App\Models\Vacation;
 
-class EmployeeController{
+class EmployeeController
+{
 
-    public function dashboard(): void {
+    public function dashboard(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             $Vacation = new Vacation();
 
-            $data['vacation_requests'] = $Vacation::whereUserId($_SESSION['user_id']);
+            $data['vacation_requests'] = $Vacation->whereUserId($_SESSION['user_id']);
 
             include __DIR__ . '/../Views/Employee/Dashboard.php';
             exit();
         }
     }
 
-    public function updateVacationRequest(): void {
+    public function updateVacationRequest(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $vacationId = $_POST['vacation_id'];
             $startDate = $_POST['start_date'];
             $endDate = $_POST['end_date'];
             $reason = $_POST['reason'];
-            $userId = $_SESSION['user_id']; 
+            $userId = $_SESSION['user_id'];
 
 
             if (empty($startDate) || empty($endDate) || empty($reason)) {
@@ -44,7 +47,7 @@ class EmployeeController{
 
             $Vacation = new Vacation();
 
-            $existingVacations = $Vacation::whereUserId($userId);
+            $existingVacations = $Vacation->whereUserId($userId);
             foreach ($existingVacations as $vacation) {
                 if ($vacation['id'] == $vacationId) {
                     continue;
@@ -60,7 +63,7 @@ class EmployeeController{
                 }
             }
 
-            $updated = $Vacation::update($vacationId, [
+            $updated = $Vacation->update($vacationId, [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'reason' => $reason,
@@ -78,7 +81,8 @@ class EmployeeController{
     }
 
 
-    public function createVacationRequest(): void {
+    public function createVacationRequest(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $startDate = $_POST['start_date'];
@@ -99,7 +103,7 @@ class EmployeeController{
             }
 
             $Vacation = new Vacation();
-            $existingVacations = $Vacation::whereUserId($userId);
+            $existingVacations = $Vacation->whereUserId($userId);
 
             foreach ($existingVacations as $vacation) {
                 if (
@@ -112,7 +116,7 @@ class EmployeeController{
                 }
             }
 
-            $result = $Vacation::create($userId, $startDate, $endDate, $reason);
+            $result = $Vacation->create($userId, $startDate, $endDate, $reason);
             if (!$result) {
                 $_SESSION['error'] = "Failed to create vacation request.";
             }
@@ -122,12 +126,13 @@ class EmployeeController{
         }
     }
 
-    public function deleteVacationRequest(): void {
+    public function deleteVacationRequest(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $vacationId = $_POST['vacation_id'];
             $Vacation = new Vacation();
-            $Vacation::delete($vacationId);
+            $Vacation->delete($vacationId);
 
             header('Location: /employee/dashboard');
             exit();

@@ -7,27 +7,29 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use App\config\Database;
 use PDO;
 
-class RouteController {
+class RouteController
+{
     private PDO $db;
     private LoginController $loginController;
     private EmployeeController $employeeController;
     private ManagerController $managerController;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->db = (new Database())->getConnection();
         $this->employeeController = new EmployeeController();
         $this->managerController = new ManagerController();
         $this->loginController = new LoginController($this->db);
     }
 
-    public function route(string $route): void {
+    public function route(string $route): void
+    {
         $urlParts = parse_url($route);
         $path = $urlParts['path'];
 
         $segments = explode('/', trim($path, '/'));
         $root = $segments[0] ?? null;
-        //var_dump($route);
-        //exit;
+
         switch ($root) {
             case null:
             case 'login':
@@ -60,14 +62,16 @@ class RouteController {
         }
     }
 
-    private function checkAccess(string $role): void {
+    private function checkAccess(string $role): void
+    {
         if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] !== $role) {
             header('Location: /403');
             exit;
         }
     }
 
-    private function handleRoleBasedRoute(string $role, array $segments): void {
+    private function handleRoleBasedRoute(string $role, array $segments): void
+    {
         $this->checkAccess($role);
 
         $controller = $role === 'manager' ? $this->managerController : $this->employeeController;
@@ -80,17 +84,20 @@ class RouteController {
         }
     }
 
-    public function notFound(): void {
+    public function notFound(): void
+    {
         http_response_code(404);
         $this->render('Error/404', ['homeUrl' => $this->home()]);
     }
 
-    public function accessDenied(): void {
+    public function accessDenied(): void
+    {
         http_response_code(403);
         $this->render('Error/403', ['homeUrl' => $this->home()]);
     }
 
-    public function home(): string {
+    public function home(): string
+    {
         if (!isset($_SESSION['user_id'])) {
             return '/login';
         }
@@ -99,7 +106,8 @@ class RouteController {
             : ($_SESSION['user_role'] === 'employee' ? '/employee/dashboard' : '/login');
     }
 
-    public function render(string $view, array $data = []): void {
+    public function render(string $view, array $data = []): void
+    {
         extract($data);
         include __DIR__ . "/../Views/$view.php";
     }

@@ -5,22 +5,25 @@ namespace App\Models;
 use PDO;
 use App\Config\Database;
 
-class User {
-    private static ?PDO $conn = null;
+class User
+{
+    private  static ?PDO $conn = null;
     private static string $table = 'users';
 
-    public function __construct() {
+    public function __construct()
+    {
         if (self::$conn === null) {
             self::$conn = Database::getConnection();
         }
     }
 
-    public static function create(string $name, string $email, string $password, string $role, int $employee_code): bool {
+    public function create(string $name, string $email, string $password, string $role, int $employee_code): bool
+    {
         if (self::whereEmail($email)) {
             $_SESSION['error'] = 'Email already exists';
             return false;
         }
-        if (self::whereEmployeeCode($employee_code)){
+        if (self::whereEmployeeCode($employee_code)) {
             $_SESSION['error'] = 'Employee Code already exists';
             return false;
         }
@@ -39,7 +42,8 @@ class User {
     }
 
 
-    public static function whereEmail(string $email): ?array {
+    public function whereEmail(string $email): ?array
+    {
         $query = "SELECT * FROM " . self::$table . " WHERE email = :email";
         $stmt = self::$conn->prepare($query);
         $stmt->bindParam(':email', $email);
@@ -47,25 +51,28 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    public static function whereEmployeeCode(int $code): ?array {
+    public function whereEmployeeCode(int $code): ?array
+    {
         $query = "SELECT * FROM " . self::$table . " WHERE employee_code = :employee_code LIMIT 1";
         $stmt = self::$conn->prepare($query);
         $stmt->bindParam(':employee_code', $code);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public static function all(): ?array {
+    public function all(): ?array
+    {
         $query = "SELECT name, email, role, id, employee_code FROM " . self::$table;
         $stmt = self::$conn->prepare($query);
         if ($stmt->execute()) {
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             return !empty($results) ? $results : null;
         }
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
     }
 
-    public static function update(int $employee_code, array $fields): bool {
+    public function update(int $employee_code, array $fields): bool
+    {
         if (empty($fields)) {
             $_SESSION['error'] = 'No required fields provided';
             return false;
@@ -73,7 +80,7 @@ class User {
 
         $user = self::whereEmail($fields['email']);
 
-        if($user){
+        if ($user) {
             $_SESSION['error'] = 'Email already exists';
             return false;
         }
@@ -97,7 +104,8 @@ class User {
     }
 
 
-    public static function delete(int $employee_code): bool {
+    public function delete(int $employee_code): bool
+    {
         if ($employee_code === 1000000) {
             $_SESSION['error'] = 'Cannot delete root account';
             return false;

@@ -7,25 +7,27 @@ use App\Models\User;
 use App\Models\Vacation;
 
 
-class ManagerController{
+class ManagerController
+{
 
-    public function dashboard(): void {
+    public function dashboard(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $User = new User();
             $Vacation = new Vacation();
 
-            $data['users'] = $User::all();
+            $data['users'] = $User->all();
 
             $usersById = [];
             foreach ($data['users'] as $user) {
                 $usersById[$user['id']] = $user['name'];
             }
 
-            $vacations = $Vacation::all();
-            $data['vacations_pending'] = Vacation::whereStatus('pending') ? Vacation::whereStatus('pending') : [];
+            $vacations = $Vacation->all();
+            $data['vacations_pending'] = $Vacation->whereStatus('pending');
 
             foreach ($data['users'] as &$user) {
-                $user['pending_vacations'] = count(array_filter($vacations, function($vacation) use ($user) {
+                $user['pending_vacations'] = count(array_filter($vacations, function ($vacation) use ($user) {
                     return $vacation['user_id'] === $user['id'] && $vacation['status'] === 'pending';
                 }));
             }
@@ -49,8 +51,9 @@ class ManagerController{
 
 
 
-    public function createUser(): void{
-        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    public function createUser(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $User = new User();
 
             $name = $_POST['name'];
@@ -58,23 +61,24 @@ class ManagerController{
             $password = $_POST['password'];
             $role = $_POST['role'];
             $employee_code = $_POST['employee_code'];
-            $User::create($name, $email, $password, $role, $employee_code);
+            $User->create($name, $email, $password, $role, $employee_code);
             header('Location: /manager/dashboard');
             exit();
         }
     }
 
-    public function deleteUser(): void {
+    public function deleteUser(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $User = new User();
             $Vacation = new Vacation();
 
             $employee_code = $_POST['employee_code'];
-            $user = $User::whereEmployeeCode($employee_code);
+            $user = $User->whereEmployeeCode($employee_code);
 
             if ($user) {
-                $Vacation::deleteUserVacationRequests($user['id']);
-                $User::delete($user['employee_code']);
+                $Vacation->deleteUserVacationRequests($user['id']);
+                $User->delete($user['employee_code']);
             }
 
             header('Location: /manager/dashboard');
@@ -82,20 +86,22 @@ class ManagerController{
         }
     }
 
-    public function showUser(): void {
+    public function showUser(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $User = new User();
             $Vacation = new Vacation();
 
-            $user = $User::whereEmployeeCode($_GET['employee_code']);
-            $vacations = $Vacation::whereUserId($user['id']);
+            $user = $User->whereEmployeeCode($_GET['employee_code']);
+            $vacations = $Vacation->whereUserId($user['id']);
 
             include __DIR__ . '/../Views/Manager/Show.php';
             exit();
         }
     }
 
-    public function editUser(): void {
+    public function editUser(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $employee_code = $_POST['employee_code'];
             $name = $_POST['name'];
@@ -119,14 +125,15 @@ class ManagerController{
                 $updateData['password'] = $passwordHash;
             }
 
-            $User::update($employee_code, $updateData);
+            $User->update($employee_code, $updateData);
 
             header('Location: /manager/showUser?employee_code=' . $employee_code);
             exit();
         }
     }
 
-    public function updateVacationStatus(): void {
+    public function updateVacationStatus(): void
+    {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (isset($_POST['vacation_id']) && isset($_POST['status'])) {
@@ -134,7 +141,7 @@ class ManagerController{
                 $status = $_POST['status'];
 
                 $Vacation = new Vacation();
-                $updated = $Vacation::update($vacationId, ['status' => $status]);
+                $updated = $Vacation->update($vacationId, ['status' => $status]);
 
                 if ($updated) {
                     header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -145,7 +152,4 @@ class ManagerController{
             }
         }
     }
-
-
-
 }

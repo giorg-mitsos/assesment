@@ -23,7 +23,7 @@ class LoginController {
             $password = $_POST['password'];
 
             $User = new User();
-            $user = $User::whereEmail($email);
+            $user = $User->whereEmail($email);
 
             if ($user && password_verify($password, $user['password'])) {
 
