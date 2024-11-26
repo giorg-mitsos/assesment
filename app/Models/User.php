@@ -80,7 +80,7 @@ class User
 
         $user = self::whereEmail($fields['email']);
 
-        if ($user) {
+        if ($user && $user['employee_code'] != $employee_code) {
             $_SESSION['error'] = 'Email already exists';
             return false;
         }
