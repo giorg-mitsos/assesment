@@ -9,22 +9,28 @@ use App\Models\Vacation;
 
 class ManagerController
 {
+    private $User;
+    private $Vacation;
+
+    public function __construct()
+    {
+        $this->User = new User();
+        $this->Vacation = new Vacation();
+    }
 
     public function dashboard(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $User = new User();
-            $Vacation = new Vacation();
 
-            $data['users'] = $User->all();
+            $data['users'] = $this->User->all();
 
             $usersById = [];
             foreach ($data['users'] as $user) {
                 $usersById[$user['id']] = $user['name'];
             }
 
-            $vacations = $Vacation->all();
-            $data['vacations_pending'] = $Vacation->whereStatus('pending');
+            $vacations = $this->Vacation->all();
+            $data['vacations_pending'] = $this->Vacation->whereStatus('pending');
 
             foreach ($data['users'] as &$user) {
                 $user['pending_vacations'] = count(array_filter($vacations, function ($vacation) use ($user) {
@@ -54,14 +60,14 @@ class ManagerController
     public function createUser(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $User = new User();
 
             $name = $_POST['name'];
             $email = $_POST['email'];
             $password = $_POST['password'];
             $role = $_POST['role'];
             $employee_code = $_POST['employee_code'];
-            $User->create($name, $email, $password, $role, $employee_code);
+            $this->User->create($name, $email, $password, $role, $employee_code);
+
             header('Location: /manager/dashboard');
             exit();
         }
@@ -70,11 +76,9 @@ class ManagerController
     public function deleteUser(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $User = new User();
-            $Vacation = new Vacation();
 
             $employee_code = $_POST['employee_code'];
-            $user = $User->whereEmployeeCode($employee_code);
+            $user = $this->User->whereEmployeeCode($employee_code);
 
             if ($user['employee_code'] === $_SESSION['employee_code']) {
                 $_SESSION['error'] = 'You can\'t delete your own account';
@@ -83,8 +87,8 @@ class ManagerController
             }
 
             if ($user) {
-                $Vacation->deleteUserVacationRequests($user['id']);
-                $User->delete($user['employee_code']);
+                $this->Vacation->deleteUserVacationRequests($user['id']);
+                $this->User->delete($user['employee_code']);
             }
 
             header('Location: /manager/dashboard');
@@ -95,11 +99,9 @@ class ManagerController
     public function showUser(): void
     {
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            $User = new User();
-            $Vacation = new Vacation();
 
-            $user = $User->whereEmployeeCode($_GET['employee_code']);
-            $vacations = $Vacation->whereUserId($user['id']);
+            $user = $this->User->whereEmployeeCode($_GET['employee_code']);
+            $vacations = $this->Vacation->whereUserId($user['id']);
 
             include __DIR__ . '/../Views/Manager/Show.php';
             exit();
@@ -113,8 +115,6 @@ class ManagerController
             $name = $_POST['name'];
             $email = $_POST['email'];
             $password = $_POST['password'];
-
-            $User = new User();
 
             $updateData = [
                 'name' => $name,
@@ -131,7 +131,7 @@ class ManagerController
                 $updateData['password'] = $passwordHash;
             }
 
-            $User->update($employee_code, $updateData);
+            $this->User->update($employee_code, $updateData);
 
             header('Location: /manager/showUser?employee_code=' . $employee_code);
             exit();
@@ -146,8 +146,7 @@ class ManagerController
                 $vacationId = $_POST['vacation_id'];
                 $status = $_POST['status'];
 
-                $Vacation = new Vacation();
-                $updated = $Vacation->update($vacationId, ['status' => $status]);
+                $updated = $this->Vacation->update($vacationId, ['status' => $status]);
 
                 if ($updated) {
                     header('Location: ' . $_SERVER['HTTP_REFERER']);

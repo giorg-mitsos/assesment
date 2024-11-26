@@ -7,14 +7,20 @@ use App\Models\Vacation;
 
 class EmployeeController
 {
+    private $Vacation;
+
+    public function __construct()
+    {
+        $this->Vacation = new Vacation();
+    }
+
 
     public function dashboard(): void
     {
+
         if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
-            $Vacation = new Vacation();
-
-            $data['vacation_requests'] = $Vacation->whereUserId($_SESSION['user_id']);
+            $data['vacation_requests'] = $this->Vacation->whereUserId($_SESSION['user_id']);
 
             include __DIR__ . '/../Views/Employee/Dashboard.php';
             exit();
@@ -45,9 +51,8 @@ class EmployeeController
             }
 
 
-            $Vacation = new Vacation();
 
-            $existingVacations = $Vacation->whereUserId($userId);
+            $existingVacations = $this->Vacation->whereUserId($userId);
             foreach ($existingVacations as $vacation) {
                 if ($vacation['id'] == $vacationId) {
                     continue;
@@ -63,7 +68,7 @@ class EmployeeController
                 }
             }
 
-            $updated = $Vacation->update($vacationId, [
+            $updated = $this->Vacation->update($vacationId, [
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'reason' => $reason,
@@ -102,8 +107,7 @@ class EmployeeController
                 exit;
             }
 
-            $Vacation = new Vacation();
-            $existingVacations = $Vacation->whereUserId($userId);
+            $existingVacations = $this->Vacation->whereUserId($userId);
 
             foreach ($existingVacations as $vacation) {
                 if (
@@ -116,7 +120,7 @@ class EmployeeController
                 }
             }
 
-            $result = $Vacation->create($userId, $startDate, $endDate, $reason);
+            $result = $this->Vacation->create($userId, $startDate, $endDate, $reason);
             if (!$result) {
                 $_SESSION['error'] = "Failed to create vacation request.";
             }
@@ -131,8 +135,7 @@ class EmployeeController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $vacationId = $_POST['vacation_id'];
-            $Vacation = new Vacation();
-            $Vacation->delete($vacationId);
+            $this->Vacation->delete($vacationId);
 
             header('Location: /employee/dashboard');
             exit();
